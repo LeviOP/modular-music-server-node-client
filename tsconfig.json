@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "strict": true,
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "declaration": true,
+        "lib": ["ES2016"],
+        "rootDir": "src",
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "outDir": "build",
+        "esModuleInterop": true
+    }
+}
