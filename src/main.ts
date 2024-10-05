@@ -1,15 +1,17 @@
 import { HandshakeRequest, ListType, RequestList } from "./proto/message.js";
-import * as net from "node:net";
+import { Socket } from "node:net";
 import { Client, decodeMessage, encodeMessage, MessageType } from "./util.js";
 import handlers from "./handlers/index.js";
 
-const socketClient = new net.Socket();
-socketClient.connect({
+const socket = new Socket();
+socket.connect({
     host: "localhost",
     port: 8080
 });
 
-const client: Client = {};
+const client: Client = {
+    socket
+};
 
 export function startup() {
     const request = RequestList.encode({
@@ -17,7 +19,7 @@ export function startup() {
     }).finish();
     const message = encodeMessage(MessageType.MESSAGE_REQUESTLIST, request);
 
-    socketClient.write(message);
+    socket.write(message);
 }
 
 function makeHandshakeRequest() {
@@ -26,15 +28,15 @@ function makeHandshakeRequest() {
     }).finish();
     const message = encodeMessage(MessageType.MESSAGE_HANDSHAKE_REQUEST, handshake);
 
-    socketClient.write(message);
+    socket.write(message);
 }
 
-socketClient.on("connect", () => {
+socket.on("connect", () => {
     console.log("connected!");
     makeHandshakeRequest();
 });
 
-socketClient.on("data", (data) => {
+socket.on("data", (data) => {
     const [type, message] = decodeMessage(data);
     const handler = handlers.get(type);
     if (handler === undefined) {
@@ -44,6 +46,6 @@ socketClient.on("data", (data) => {
     handler(client, message);
 });
 
-socketClient.on("close", () => {
+socket.on("close", () => {
     console.log("closing connection");
 });

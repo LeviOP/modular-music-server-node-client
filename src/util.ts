@@ -1,13 +1,17 @@
 import { BinaryWriter } from "@bufbuild/protobuf/wire";
+import { Socket } from "net";
 
 export interface Client {
     serverProtocolVersion?: string;
+    socket: Socket;
 }
 
 export const enum MessageType {
     MESSAGE_HANDSHAKE_REQUEST = 0,
     MESSAGE_HANDSHAKE_RESPONSE,
-    MESSAGE_REQUESTLIST
+    MESSAGE_REQUESTLIST,
+    MESSAGE_LISTPROVIDERS,
+    MESSAGE_REQUESTPROVIDER
 }
 
 export function encodeMessage(type: MessageType, data: Uint8Array): Uint8Array {
