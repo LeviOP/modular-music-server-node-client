@@ -6,7 +6,7 @@ import handlers from "./handlers/index.js";
 const socket = new Socket();
 socket.connect({
     host: "localhost",
-    port: 8080
+    port: 6065
 });
 
 const client: Client = {
