@@ -1,5 +1,5 @@
 import { Client, encodeMessage, MessageType } from "../util.js";
-import { ListProviders, RequestProvider } from "../proto/message.js";
+import { ListProviders, RequestProvider } from "@modular-music-server/protobufs";
 import prompts from "prompts";
 
 export default async function(client: Client, buffer: Buffer) {

@@ -6,8 +6,7 @@
     "type": "module",
     "scripts": {
         "start": "pnpm build && node .",
-        "build": "tsc",
-        "protoBuild": "protoc --plugin=\"./node_modules/.bin/protoc-gen-ts_proto\" --ts_proto_opt=esModuleInterop=true --ts_proto_out=\"./src/\" proto/message.proto"
+        "build": "tsc"
     },
     "keywords": [],
     "author": "",
@@ -24,6 +23,7 @@
     },
     "dependencies": {
         "@bufbuild/protobuf": "^2.0.0",
+        "@modular-music-server/protobufs": "link:../proto/node",
         "prompts": "^2.4.2",
         "ts-proto": "^2.0.3"
     }

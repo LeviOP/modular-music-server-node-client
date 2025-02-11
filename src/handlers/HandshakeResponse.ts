@@ -1,5 +1,5 @@
 import { Client } from "../util.js";
-import { HandshakeResponse } from "../proto/message.js";
+import { HandshakeResponse } from "@modular-music-server/protobufs";
 import { startup } from "../main.js";
 
 export default function(client: Client, buffer: Buffer) {
