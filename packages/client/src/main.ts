@@ -1,8 +1,7 @@
-import { HandshakeRequest, ListType, RequestList } from "./proto/message.js";
+import { HandshakeRequest, ListType, RequestList } from "@modular-music-server/protobufs";
 import { Socket } from "node:net";
-import { Client, encodeMessage, getDataDir, MessageType, parseProviders } from "./util.js";
+import { Client, encodeMessage, MessageType } from "./util.js";
 import handlers from "./handlers/index.js";
-import { existsSync } from "node:fs";
 import prompts from "prompts";
 
 const socket = new Socket();
@@ -17,10 +16,6 @@ const client: Client = {
     providers: []
 };
 
-const dataDir = getDataDir();
-if (existsSync(dataDir)) {
-    client.providers = await parseProviders(dataDir);
-};
 
 export async function startup() {
     const { choice } = await prompts({

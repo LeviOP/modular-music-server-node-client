@@ -1,6 +1,6 @@
 import { BinaryWriter } from "@bufbuild/protobuf/wire";
 import { Socket } from "net";
-import { FileType } from "@modular-music-server/protobufs";
+import { FileType, Provider } from "@modular-music-server/protobufs";
 import path from "node:path";
 import { existsSync, stat } from "fs";
 import { mkdir, readdir } from "node:fs/promises";
@@ -14,17 +14,18 @@ export interface Download {
     data: Buffer;
 }
 
-export interface Provider {
+export interface ProviderInfo {
     name: string;
     id: string;
     author: string;
+    clientDownloaded: boolean;
 }
 
 export interface Client {
     serverProtocolVersion?: string;
     socket: Socket;
     downloads: Download[];
-    providers: Provider[];
+    providers: ProviderInfo[];
 }
 
 export const enum MessageType {
@@ -64,27 +65,53 @@ export function ensureDirExists(path: string) {
     });
 }
 
-export async function parseProviders(dataDir: string): Promise<Provider[]> {
+export async function parseProviders(dataDir: string): Promise<ProviderInfo[]> {
     const providersDir = path.join(dataDir, "providers");
     if (!existsSync(providersDir)) return [];
     const files = await readdir(providersDir, { withFileTypes: true });
-    const providers: Provider[] = [];
+    const providers: ProviderInfo[] = [];
     for (const file of files) {
         if (!file.isDirectory) continue;
         const providerInfoPath = path.join(providersDir, file.name, "provider.json");
 
-        const providerInfoRaw = await readFileSafe(providerInfoPath);
-        if (providerInfoRaw === null) continue;
-        let providerInfo: unknown;
+        const providerRaw = await readFileSafe(providerInfoPath);
+        if (providerRaw === null) continue;
+        let providerJson: unknown;
         try {
-            providerInfo = JSON.parse(providerInfoRaw);
+            providerJson = JSON.parse(providerRaw);
         } catch (e) {
             console.log("Couldn't parse JSON:", e);
             continue;
         }
-        providers.push(providerInfo as Provider);
+        const provider = cleanseProvider(providerJson);
+
+        if (provider === null) continue;
+
+        const clientPath = path.join(providersDir, file.name, "client.lua");
+
+        providers.push({
+            id: provider.id,
+            name: provider.name,
+            author: provider.author,
+            clientDownloaded: existsSync(clientPath)
+        });
     }
     return providers;
+}
+
+function cleanseProvider(json: unknown): Provider | null {
+    if (typeof json !== "object") return null;
+    if (json === null) return null;
+    if (!("id" in json) || typeof json["id"] !== "string") return null;
+    if (!("name" in json) || typeof json["name"] !== "string") return null;
+    if (!("author" in json) || typeof json["author"] !== "string") return null;
+    if (!("description" in json) || typeof json["description"] !== "string") return null;
+    return {
+        id: json.id,
+        name: json.name,
+        author: json.author,
+        description: json.description
+    };
 }
 
 export async function readFileSafe(path: string): Promise<string | null> {
